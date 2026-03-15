@@ -84,13 +84,17 @@ class TicketModal(Modal, title="Create Ticket"):
 
         embedlog = discord.Embed(
             title="Ticket Created",
-            color=0x00ff00
+            color=0xff0000
         )
 
-        embedlog.add_field(name="User", value=user.mention, inline=False)
-        embedlog.add_field(name="Reason", value=self.reason.value, inline=False)
-        embedlog.add_field(name="Created at", value=formatted_time, inline=False)
-        embedlog.add_field(name="Channel", value=channel.mention, inline=False)
+        embedlog.add_field(name="`User:`", value=user.mention, inline=False)
+        embedlog.add_field(name="`Motive:`", value=self.reason.value, inline=False)
+        embedlog.add_field(name="`Created at:`", value=formatted_time, inline=False)
+        embedlog.add_field(name="`Channel:`", value=channel.mention, inline=False)
+        embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
+
 
         await log.send(embed=embedlog)
 
