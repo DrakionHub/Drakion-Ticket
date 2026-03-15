@@ -80,7 +80,7 @@ class TicketModal(Modal, title="Create Ticket"):
             view=TicketButtons()
         )
 
-    log = bot.get_channel(LOG_CREATE)
+        log = bot.get_channel(LOG_CREATE)
 
         embedlog = discord.Embed(
             title="Ticket Created",
