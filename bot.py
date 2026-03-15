@@ -233,8 +233,28 @@ async def ticket_panel(interaction: discord.Interaction):
         )
 
     embed = discord.Embed(
-        title="Support",
-        description="Click the button below to open a support ticket.",
+        title="🐉 service | Drakion Support",
+        description="
+"🇺🇸  ⚠️ Before opening a ticket:\n\n"
+
+"• Describe your issue clearly and briefly.\n"
+"• Avoid mentioning or pinging staff members.\n"
+"• Please be patient while waiting for a response.\n"
+"• Tickets without activity may be closed automatically.\n"
+"• Misuse of the support system may result in punishments.\n\n"
+
+"➡️ After opening the ticket, explain your situation and a staff member will assist you in the ticket.\n\n",
+
+
+"🇧🇷  ⚠️ Antes de abrir um ticket:\n"
+
+"• Descreva seu problema de forma clara e objetiva.\n"
+"• Evite marcar ou mencionar membros da equipe.\n"
+"• Aguarde a resposta da staff com paciência.\n"
+"• Tickets sem atividade podem ser encerrados automaticamente.\n"
+"• Uso indevido do sistema de suporte pode resultar em punições.\n\n"
+
+"➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.",
         color=0xff0000
     )
 
