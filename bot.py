@@ -45,6 +45,9 @@ class TicketModal(Modal, title="Create Ticket"):
 
         user = interaction.user
 
+        created_time = datetime.datetime.now()
+        formatted_time = created_time.strftime("%d/%m/%Y %H:%M")
+
         channel = await guild.create_text_channel(
             name=f"ticket-{user.name}",
             category=category
@@ -55,7 +58,8 @@ class TicketModal(Modal, title="Create Ticket"):
         tickets[channel.id] = {
             "user": user.id,
             "reason": self.reason.value,
-            "created": datetime.datetime.now()
+            "created": formatted_time,
+            "claimed_by": None
         }
 
         embed = discord.Embed(
@@ -67,6 +71,18 @@ class TicketModal(Modal, title="Create Ticket"):
         embed.add_field(
             name="Reason",
             value=self.reason.value,
+            inline=False
+        )
+
+        embed.add_field(
+            name="Created at",
+            value=formatted_time,
+            inline=False
+        )
+
+        embed.add_field(
+            name="Assumed by",
+            value="No staff yet",
             inline=False
         )
 
@@ -83,8 +99,10 @@ class TicketModal(Modal, title="Create Ticket"):
             color=0x00ff00
         )
 
-        embedlog.add_field(name="User", value=user.mention)
-        embedlog.add_field(name="Reason", value=self.reason.value)
+        embedlog.add_field(name="User", value=user.mention, inline=False)
+        embedlog.add_field(name="Reason", value=self.reason.value, inline=False)
+        embedlog.add_field(name="Created at", value=formatted_time, inline=False)
+        embedlog.add_field(name="Channel", value=channel.mention, inline=False)
 
         await log.send(embed=embedlog)
 
@@ -92,7 +110,6 @@ class TicketModal(Modal, title="Create Ticket"):
             f"Ticket created: {channel.mention}",
             ephemeral=True
         )
-
 
 # =========================
 # MODAL FECHAR TICKET
@@ -119,9 +136,9 @@ class CloseModal(Modal, title="Close Ticket"):
             color=0xff0000
         )
 
-        embed.add_field(name="User", value=user.mention)
-        embed.add_field(name="Closed by", value=interaction.user.mention)
-        embed.add_field(name="Reason", value=self.reason.value)
+        embed.add_field(name="User", value=user.mention, inline=False)
+        embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
+        embed.add_field(name="Reason", value=self.reason.value, inline=False)
 
         await log.send(embed=embed)
 
@@ -133,7 +150,6 @@ class CloseModal(Modal, title="Close Ticket"):
         await interaction.response.send_message("Closing ticket...")
 
         await channel.delete()
-
 
 # =========================
 # BOTÕES DO TICKET
@@ -150,12 +166,33 @@ class TicketButtons(View):
         if not any(role.id in STAFF_ROLES for role in interaction.user.roles):
             return await interaction.response.send_message("No permission.", ephemeral=True)
 
-        embed = discord.Embed(
-            description=f"Ticket claimed by {interaction.user.mention}",
-            color=0x00ff00
+        channel = interaction.channel
+        data = tickets.get(channel.id)
+
+        if data["claimed_by"] is not None:
+            staff = interaction.guild.get_member(data["claimed_by"])
+            return await interaction.response.send_message(
+                f"This ticket has already been claimed by {staff.mention}.",
+                ephemeral=True
+            )
+
+        data["claimed_by"] = interaction.user.id
+
+        message = interaction.message
+        embed = message.embeds[0]
+
+        embed.set_field_at(
+            2,
+            name="Assumed by",
+            value=interaction.user.mention,
+            inline=False
         )
 
-        await interaction.response.send_message(embed=embed)
+        await message.edit(embed=embed)
+
+        await interaction.response.send_message(
+            f"Ticket claimed by {interaction.user.mention}"
+        )
 
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket")
     async def close(self, interaction: discord.Interaction, button: Button):
@@ -164,7 +201,6 @@ class TicketButtons(View):
             return await interaction.response.send_message("No permission.", ephemeral=True)
 
         await interaction.response.send_modal(CloseModal())
-
 
 # =========================
 # PAINEL DE TICKET
@@ -183,7 +219,6 @@ class TicketPanel(View):
     async def open_ticket(self, interaction: discord.Interaction, button: Button):
 
         await interaction.response.send_modal(TicketModal())
-
 
 # =========================
 # COMANDO /ticket_panel
@@ -211,7 +246,6 @@ async def ticket_panel(interaction: discord.Interaction):
         ephemeral=True
     )
 
-
 # =========================
 # READY
 # =========================
@@ -219,7 +253,7 @@ async def ticket_panel(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
 
-    guild = discord.Object(id=1481089628374171651)
+    guild = discord.Object(id=GUILD_ID)
 
     bot.tree.copy_global_to(guild=guild)
     await bot.tree.sync(guild=guild)
@@ -227,7 +261,6 @@ async def on_ready():
     bot.add_view(TicketPanel())
     bot.add_view(TicketButtons())
 
-    print("Bot is online and commands synced")
-
+    print("Bot online and commands synced")
 
 bot.run(TOKEN)
