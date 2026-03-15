@@ -3,7 +3,6 @@ from discord.ext import commands
 from discord.ui import Button, View, Modal, TextInput
 import datetime
 import os
-
 TOKEN = os.getenv("TOKEN1")
 
 TICKET_CATEGORY = 1482794919272779990
@@ -245,4 +244,4 @@ async def on_ready():
     print("Bot online")
 
 
-bot.run(TOKEN1)
+bot.run(TOKEN)
