@@ -42,7 +42,6 @@ class TicketModal(Modal, title="Create Ticket"):
 
         guild = interaction.guild
         category = guild.get_channel(TICKET_CATEGORY)
-
         user = interaction.user
 
         created_time = datetime.datetime.now()
@@ -68,23 +67,9 @@ class TicketModal(Modal, title="Create Ticket"):
             color=0xff0000
         )
 
-        embed.add_field(
-            name="Reason",
-            value=self.reason.value,
-            inline=False
-        )
-
-        embed.add_field(
-            name="Created at",
-            value=formatted_time,
-            inline=False
-        )
-
-        embed.add_field(
-            name="Assumed by",
-            value="No staff yet",
-            inline=False
-        )
+        embed.add_field(name="Reason", value=self.reason.value, inline=False)
+        embed.add_field(name="Created at", value=formatted_time, inline=False)
+        embed.add_field(name="Assumed by", value="No staff yet", inline=False)
 
         await channel.send(
             content=user.mention,
@@ -129,6 +114,9 @@ class CloseModal(Modal, title="Close Ticket"):
 
         user = interaction.guild.get_member(data["user"])
 
+        closed_time = datetime.datetime.now()
+        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M")
+
         log = bot.get_channel(LOG_CLOSE)
 
         embed = discord.Embed(
@@ -139,11 +127,22 @@ class CloseModal(Modal, title="Close Ticket"):
         embed.add_field(name="User", value=user.mention, inline=False)
         embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
         embed.add_field(name="Reason", value=self.reason.value, inline=False)
+        embed.add_field(name="Closed at", value=formatted_close, inline=False)
 
         await log.send(embed=embed)
 
         try:
-            await user.send(embed=embed)
+            dm_embed = discord.Embed(
+                title="Your ticket was closed",
+                color=0xff0000
+            )
+
+            dm_embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
+            dm_embed.add_field(name="Reason", value=self.reason.value, inline=False)
+            dm_embed.add_field(name="Closed at", value=formatted_close, inline=False)
+
+            await user.send(embed=dm_embed)
+
         except:
             pass
 
