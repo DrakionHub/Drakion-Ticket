@@ -62,7 +62,7 @@ class TicketModal(Modal, title="Create Ticket"):
         }
 
         embed = discord.Embed(
-            title=f"Hello {user.mention} 👋, We are at your service.",
+            title=f"Hello {user.name} 👋, We are at your service.",
             description=f"🇺🇸 A staff member will assist you shortly. Please provide all necessary information about your issue to help us assist you better.\n\n🇧🇷 Um membro da nossa equipe irá atendê-lo em breve. Por favor, forneça todas as informações necessárias sobre o seu problema para que possamos ajudá-lo da melhor forma possível.\n\n",
             color=0xff0000
         )
@@ -75,7 +75,7 @@ class TicketModal(Modal, title="Create Ticket"):
         embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
     
         await channel.send(
-            content=f"{user.mention}<@&1482826480248553584>",
+            content=f"{user.mention} <@&1482826480248553584>",
             embed=embed,
             view=TicketButtons()
         )
@@ -185,7 +185,7 @@ class TicketButtons(View):
 
         embed.set_field_at(
             2,
-            name="Assumed by",
+            name="`Assumed by:`",
             value=interaction.user.mention,
             inline=False
         )
@@ -236,7 +236,7 @@ async def ticket_panel(interaction: discord.Interaction):
         )
 
     embed = discord.Embed(
-    title="🐉 service | Drakion Support",
+    title="🐉 Service | Drakion Support",
     description="""🇺🇸  ⚠️ Before opening a ticket:\n\n• Describe your issue clearly and briefly.\n• Avoid mentioning or pinging staff members.\n• Please be patient while waiting for a response.\n• Tickets without activity may be closed automatically.\n• Misuse of the support system may result in punishments.\n\n➡️ After opening the ticket, explain your situation and a staff member will assist you in the ticket.\n\n🇧🇷  ⚠️ Antes de abrir um ticket:\n• Descreva seu problema de forma clara e objetiva.\n• Evite marcar ou mencionar membros da equipe.\n• Aguarde a resposta da staff com paciência.\n• Tickets sem atividade podem ser encerrados automaticamente.\n• Uso indevido do sistema de suporte pode resultar em punições.\n\n➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.""",
     color=0xff0000
 )
