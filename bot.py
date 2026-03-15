@@ -33,7 +33,7 @@ tickets = {}
 class TicketModal(Modal, title="Create Ticket"):
 
     reason = TextInput(
-        label="Reason",
+        label="Motive for opening the ticket",
         placeholder="Explain your problem...",
         style=discord.TextStyle.long
     )
