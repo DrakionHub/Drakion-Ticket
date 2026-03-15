@@ -1,9 +1,12 @@
 import discord
 from discord.ext import commands
-from discord.ui import Button, View, Modal, TextInput
-import datetime
+from discord.ui import View, Button, Modal, TextInput
 import os
+import datetime
+
 TOKEN = os.getenv("TOKEN1")
+
+GUILD_ID = 1481089628374171651
 
 TICKET_CATEGORY = 1482794919272779990
 LOG_CREATE = 1482788464876585070
@@ -21,19 +24,17 @@ COMMAND_ROLE = 1482423776158154953
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-
 tickets = {}
 
-
 # =========================
-# MODAL PARA CRIAR TICKET
+# MODAL CRIAR TICKET
 # =========================
 
-class TicketReasonModal(Modal, title="Criar Ticket"):
+class TicketModal(Modal, title="Create Ticket"):
 
-    motivo = TextInput(
-        label="Motivo do ticket",
-        placeholder="Explique o problema...",
+    reason = TextInput(
+        label="Reason",
+        placeholder="Explain your problem...",
         style=discord.TextStyle.long
     )
 
@@ -49,36 +50,28 @@ class TicketReasonModal(Modal, title="Criar Ticket"):
             category=category
         )
 
+        await channel.set_permissions(user, read_messages=True, send_messages=True)
+
         tickets[channel.id] = {
             "user": user.id,
-            "reason": self.motivo.value,
+            "reason": self.reason.value,
             "created": datetime.datetime.now()
         }
 
-        await channel.set_permissions(user, read_messages=True, send_messages=True)
-
         embed = discord.Embed(
-            title="Suporte | Ticket",
-            description=f"Olá {user.mention}",
+            title="Support Ticket",
+            description=f"{user.mention} opened a ticket",
             color=0xff0000
         )
 
         embed.add_field(
-            name="Motivo",
-            value=self.motivo.value,
+            name="Reason",
+            value=self.reason.value,
             inline=False
         )
 
-        embed.add_field(
-            name="Status",
-            value="Aberto",
-            inline=True
-        )
-
-        embed.set_footer(text="Drakion Ticket")
-
         await channel.send(
-            content=f"{user.mention}",
+            content=user.mention,
             embed=embed,
             view=TicketButtons()
         )
@@ -86,64 +79,58 @@ class TicketReasonModal(Modal, title="Criar Ticket"):
         log = bot.get_channel(LOG_CREATE)
 
         embedlog = discord.Embed(
-            title="Ticket Criado",
+            title="Ticket Created",
             color=0x00ff00
         )
 
-        embedlog.add_field(name="Usuário", value=user.mention)
-        embedlog.add_field(name="Motivo", value=self.motivo.value)
+        embedlog.add_field(name="User", value=user.mention)
+        embedlog.add_field(name="Reason", value=self.reason.value)
 
         await log.send(embed=embedlog)
 
         await interaction.response.send_message(
-            f"Ticket criado: {channel.mention}",
+            f"Ticket created: {channel.mention}",
             ephemeral=True
         )
 
 
 # =========================
-# MODAL PARA FECHAR TICKET
+# MODAL FECHAR TICKET
 # =========================
 
-class CloseModal(Modal, title="Fechar Ticket"):
+class CloseModal(Modal, title="Close Ticket"):
 
-    motivo = TextInput(
-        label="Motivo do fechamento",
+    reason = TextInput(
+        label="Reason for closing",
         style=discord.TextStyle.long
     )
 
     async def on_submit(self, interaction: discord.Interaction):
 
         channel = interaction.channel
-
         data = tickets.get(channel.id)
 
         user = interaction.guild.get_member(data["user"])
 
-        transcript = f"https://nshw.squareweb.app/transcript/{interaction.guild.id}/{channel.id}"
-
         log = bot.get_channel(LOG_CLOSE)
 
         embed = discord.Embed(
-            title="Ticket Fechado",
+            title="Ticket Closed",
             color=0xff0000
         )
 
-        embed.add_field(name="Usuário", value=user.mention)
-        embed.add_field(name="Staff", value=interaction.user.mention)
-        embed.add_field(name="Motivo", value=self.motivo.value)
+        embed.add_field(name="User", value=user.mention)
+        embed.add_field(name="Closed by", value=interaction.user.mention)
+        embed.add_field(name="Reason", value=self.reason.value)
 
-        view = View()
-        view.add_item(Button(label="Transcript", url=transcript))
-
-        await log.send(embed=embed, view=view)
+        await log.send(embed=embed)
 
         try:
-            await user.send(embed=embed, view=view)
+            await user.send(embed=embed)
         except:
             pass
 
-        await interaction.response.send_message("Ticket será fechado.")
+        await interaction.response.send_message("Closing ticket...")
 
         await channel.delete()
 
@@ -157,36 +144,30 @@ class TicketButtons(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Assumir Ticket", style=discord.ButtonStyle.green)
-    async def assumir(self, interaction: discord.Interaction, button: Button):
+    @discord.ui.button(label="Claim Ticket", style=discord.ButtonStyle.green, custom_id="claim_ticket")
+    async def claim(self, interaction: discord.Interaction, button: Button):
 
         if not any(role.id in STAFF_ROLES for role in interaction.user.roles):
-            return await interaction.response.send_message(
-                "Sem permissão.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("No permission.", ephemeral=True)
 
         embed = discord.Embed(
-            description=f"Ticket assumido por {interaction.user.mention}",
+            description=f"Ticket claimed by {interaction.user.mention}",
             color=0x00ff00
         )
 
         await interaction.response.send_message(embed=embed)
 
-    @discord.ui.button(label="Finalizar Ticket", style=discord.ButtonStyle.red)
-    async def fechar(self, interaction: discord.Interaction, button: Button):
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket")
+    async def close(self, interaction: discord.Interaction, button: Button):
 
         if not any(role.id in STAFF_ROLES for role in interaction.user.roles):
-            return await interaction.response.send_message(
-                "Sem permissão.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("No permission.", ephemeral=True)
 
         await interaction.response.send_modal(CloseModal())
 
 
 # =========================
-# BOTÃO PRINCIPAL
+# PAINEL DE TICKET
 # =========================
 
 class TicketPanel(View):
@@ -195,53 +176,58 @@ class TicketPanel(View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Abrir Ticket",
+        label="Open Ticket",
         style=discord.ButtonStyle.primary,
         custom_id="open_ticket"
     )
-    async def ticket(self, interaction: discord.Interaction, button: Button):
+    async def open_ticket(self, interaction: discord.Interaction, button: Button):
 
-        await interaction.response.send_modal(TicketReasonModal())
+        await interaction.response.send_modal(TicketModal())
 
 
 # =========================
-# COMANDO PARA ENVIAR PAINEL
+# COMANDO /ticket_panel
 # =========================
 
-@bot.tree.command(name="ticket_panel")
-async def painel(interaction: discord.Interaction):
+@bot.tree.command(name="ticket_panel", description="Send the ticket panel")
+async def ticket_panel(interaction: discord.Interaction):
 
     if not any(role.id == COMMAND_ROLE for role in interaction.user.roles):
         return await interaction.response.send_message(
-            "Sem permissão.",
+            "You don't have permission.",
             ephemeral=True
         )
 
     embed = discord.Embed(
-        title="Suporte",
-        description="Clique no botão abaixo para abrir um ticket.",
+        title="Support",
+        description="Click the button below to open a support ticket.",
         color=0xff0000
     )
 
     await interaction.channel.send(embed=embed, view=TicketPanel())
 
     await interaction.response.send_message(
-        "Painel enviado.",
+        "Ticket panel sent.",
         ephemeral=True
     )
 
 
 # =========================
+# READY
+# =========================
 
 @bot.event
 async def on_ready():
 
+    guild = discord.Object(id=1481089628374171651)
+
+    bot.tree.copy_global_to(guild=guild)
+    await bot.tree.sync(guild=guild)
+
     bot.add_view(TicketPanel())
     bot.add_view(TicketButtons())
 
-    await bot.tree.sync()
-
-    print("Bot online")
+    print("Bot is online and commands synced")
 
 
 bot.run(TOKEN)
