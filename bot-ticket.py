@@ -1,0 +1,1 @@
+token já esta adicionado no railway em uma variável chamada TOKEN1
