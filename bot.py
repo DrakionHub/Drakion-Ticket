@@ -254,7 +254,7 @@ async def ticket_panel(interaction: discord.Interaction):
 "• Tickets sem atividade podem ser encerrados automaticamente.\n"
 "• Uso indevido do sistema de suporte pode resultar em punições.\n\n"
 
-"➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.",
+"➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento."",
         color=0xff0000
     )
 
