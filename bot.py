@@ -238,6 +238,10 @@ async def ticket_panel(interaction: discord.Interaction):
     color=0xff0000
 )
 
+embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
+    embed.set_image(url=["https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png"])
+    embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
+
     await interaction.channel.send(embed=embed, view=TicketPanel())
 
     await interaction.response.send_message(
