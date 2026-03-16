@@ -172,6 +172,8 @@ class CloseModal(Modal, title="Close Ticket"):
 
         await interaction.response.send_message("Closing ticket...")
 
+        tickets.pop(channel.id, None)
+
         await channel.delete()
 
 # =========================
