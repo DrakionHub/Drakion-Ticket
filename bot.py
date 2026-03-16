@@ -131,10 +131,13 @@ class CloseModal(Modal, title="Close Ticket"):
             color=0xff0000
         )
 
-        embed.add_field(name="User", value=user.mention, inline=False)
-        embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
-        embed.add_field(name="Reason", value=self.reason.value, inline=False)
-        embed.add_field(name="Closed at", value=formatted_close, inline=False)
+        embed.add_field(name="`User:`", value=user.mention, inline=False)
+        embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
+        embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
+        embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
+        embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
         await log.send(embed=embed)
 
@@ -144,9 +147,12 @@ class CloseModal(Modal, title="Close Ticket"):
                 color=0xff0000
             )
 
-            dm_embed.add_field(name="Closed by", value=interaction.user.mention, inline=False)
-            dm_embed.add_field(name="Reason", value=self.reason.value, inline=False)
-            dm_embed.add_field(name="Closed at", value=formatted_close, inline=False)
+            dm_embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
+            dm_embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
+            dm_embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
+            dm_embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
+            dm_embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+            dm_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
             await user.send(embed=dm_embed)
 
