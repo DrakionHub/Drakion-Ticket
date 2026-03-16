@@ -157,7 +157,7 @@ class CloseModal(Modal, title="Close Ticket"):
            transcript = await chat_exporter.export(
                channel,
                limit=None,
-               tz_info=ZoneInfo("America/Sao_Paulo"),
+               tz_info="America/Sao_Paulo",
                guild=interaction.guild,
                bot=bot
            )
