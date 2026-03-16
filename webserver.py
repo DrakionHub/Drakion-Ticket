@@ -1,0 +1,9 @@
+from flask import Flask, send_from_directory
+
+app = Flask(__name__)
+
+@app.route("/transcript/<path:filename>")
+def transcript(filename):
+    return send_from_directory("transcripts", filename)
+
+app.run(host="0.0.0.0", port=3000)
