@@ -3,6 +3,8 @@ from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 import os
 import datetime
+import chat_exporter
+import io
 from zoneinfo import ZoneInfo
 
 TOKEN = os.getenv("TOKEN1")
@@ -141,6 +143,14 @@ class CloseModal(Modal, title="Close Ticket"):
             title="Ticket Closed",
             color=0xff0000
         )
+        view = discord.ui.View()
+
+        view.add_item(
+            discord.ui.Button(
+                label="View Transcript",
+                url=transcript_url
+    )
+)
 
         embed.add_field(name="`User:`", value=user.mention, inline=False)
         embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
@@ -150,7 +160,7 @@ class CloseModal(Modal, title="Close Ticket"):
         embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
         embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
-        await log.send(embed=embed)
+        await log.send(embed=embed, view=view)
 
         try:
             dm_embed = discord.Embed(
@@ -165,10 +175,32 @@ class CloseModal(Modal, title="Close Ticket"):
             dm_embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
             dm_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
-            await user.send(embed=dm_embed)
+            await user.send(embed=dm_embed, view=view)
 
         except:
             pass
+# =========================
+# GERAR TRANSCRIPT
+# =========================
+
+       transcript = await chat_exporter.export(
+           interaction.channel,
+           limit=None,
+           tz_info="America/Sao_Paulo",
+           bot=bot
+        )
+
+        if transcript is None:
+            return
+
+        file_name = f"transcript-{interaction.channel.id}.html"
+        file_path = f"transcripts/{file_name}"
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(transcript)
+
+        transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+
 
         await interaction.response.send_message("Closing ticket...")
 
@@ -229,6 +261,8 @@ class TicketButtons(View):
             return await interaction.response.send_message("No permission.", ephemeral=True)
 
         await interaction.response.send_modal(CloseModal())
+
+        
 
 # =========================
 # PAINEL DE TICKET
