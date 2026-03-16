@@ -45,11 +45,18 @@ class TicketModal(Modal, title="Create Ticket"):
         category = guild.get_channel(TICKET_CATEGORY)
         user = interaction.user
 
-        created_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))
-        formatted_time = created_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")
+        for ticket in tickets.values():
+            if ticket["user"] == user.id:
+                return await interaction.response.send_message(
+                    "You already have an open ticket.",
+                    ephemeral=True
+        )
+
+        created_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))  # Mude para usar o fuso de Brasília
+        formatted_time = created_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")  # Adicione a indicação
 
         channel = await guild.create_text_channel(
-            name=f"ticket-{user.name}",
+            name=f"ticket-{user.id}",
             category=category
         )
 
@@ -71,18 +78,10 @@ class TicketModal(Modal, title="Create Ticket"):
         embed.add_field(name="`Motive:`", value=self.reason.value, inline=False)
         embed.add_field(name="`Created at:`", value=formatted_time, inline=False)
         embed.add_field(name="`Assumed by:`", value="Ticket not claimed", inline=False)
-
-        embed.set_footer(
-            text="Drakion Ticket © | All Rights Reserved.",
-            icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
-
+        embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
         embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-
-        embed.set_thumbnail(
-            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
-
+        embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
+    
         await channel.send(
             content=f"{user.mention} <@&1482826480248553584>",
             embed=embed,
@@ -100,17 +99,10 @@ class TicketModal(Modal, title="Create Ticket"):
         embedlog.add_field(name="`Motive:`", value=self.reason.value, inline=False)
         embedlog.add_field(name="`Created at:`", value=formatted_time, inline=False)
         embedlog.add_field(name="`Channel:`", value=channel.mention, inline=False)
-
-        embedlog.set_footer(
-            text="Drakion Ticket © | All Rights Reserved.",
-            icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
-
+        embedlog.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
         embedlog.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+        embedlog.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
-        embedlog.set_thumbnail(
-            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
 
         await log.send(embed=embedlog)
 
@@ -134,12 +126,15 @@ class CloseModal(Modal, title="Close Ticket"):
 
         channel = interaction.channel
         data = tickets.get(channel.id)
-
+        if data is None:
+            return await interaction.response.send_message(
+                "Ticket data not found.",
+                 ephemeral=True
+    )
         user = interaction.guild.get_member(data["user"])
 
-        closed_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))
-        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")
-
+        closed_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))  # Mude para usar o fuso de Brasília
+        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")  # Adicione a indicação
         log = bot.get_channel(LOG_CLOSE)
 
         embed = discord.Embed(
@@ -151,22 +146,13 @@ class CloseModal(Modal, title="Close Ticket"):
         embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
         embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
         embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
-
-        embed.set_footer(
-            text="Drakion Ticket © | All Rights Reserved.",
-            icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
-
+        embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
         embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-
-        embed.set_thumbnail(
-            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-        )
+        embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
         await log.send(embed=embed)
 
         try:
-
             dm_embed = discord.Embed(
                 title="Your ticket was closed",
                 color=0xff0000
@@ -175,17 +161,9 @@ class CloseModal(Modal, title="Close Ticket"):
             dm_embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
             dm_embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
             dm_embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
-
-            dm_embed.set_footer(
-                text="Drakion Ticket © | All Rights Reserved.",
-                icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-            )
-
+            dm_embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
             dm_embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-
-            dm_embed.set_thumbnail(
-                url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-            )
+            dm_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
 
             await user.send(embed=dm_embed)
 
@@ -194,12 +172,10 @@ class CloseModal(Modal, title="Close Ticket"):
 
         await interaction.response.send_message("Closing ticket...")
 
-        tickets.pop(channel.id, None)
-
         await channel.delete()
 
 # =========================
-# BOTÕES
+# BOTÕES DO TICKET
 # =========================
 
 class TicketButtons(View):
@@ -226,6 +202,9 @@ class TicketButtons(View):
         data["claimed_by"] = interaction.user.id
 
         message = interaction.message
+        if not message.embeds:
+            return
+
         embed = message.embeds[0]
 
         embed.set_field_at(
@@ -250,7 +229,7 @@ class TicketButtons(View):
         await interaction.response.send_modal(CloseModal())
 
 # =========================
-# PAINEL
+# PAINEL DE TICKET
 # =========================
 
 class TicketPanel(View):
@@ -268,7 +247,7 @@ class TicketPanel(View):
         await interaction.response.send_modal(TicketModal())
 
 # =========================
-# COMANDO
+# COMANDO /ticket_panel
 # =========================
 
 @bot.tree.command(name="ticket_panel", description="Send the ticket panel")
@@ -282,30 +261,13 @@ async def ticket_panel(interaction: discord.Interaction):
 
     embed = discord.Embed(
     title="🐉 Service | Drakion Support",
-    description="""🇺🇸  ⚠️ Before opening a ticket:
-
-• Describe your issue clearly and briefly.
-• Avoid mentioning or pinging staff members.
-• Please be patient while waiting for a response.
-• Tickets without activity may be closed automatically.
-• Misuse of the support system may result in punishments.
-
-➡️ After opening the ticket, explain your situation and a staff member will assist you in the ticket.
-
-🇧🇷  ⚠️ Antes de abrir um ticket:
-• Descreva seu problema de forma clara e objetiva.
-• Evite marcar ou mencionar membros da equipe.
-• Aguarde a resposta da staff com paciência.
-• Tickets sem atividade podem ser encerrados automaticamente.
-• Uso indevido do sistema de suporte pode resultar em punições.
-
-➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.""",
+    description="""🇺🇸  ⚠️ Before opening a ticket:\n\n• Describe your issue clearly and briefly.\n• Avoid mentioning or pinging staff members.\n• Please be patient while waiting for a response.\n• Tickets without activity may be closed automatically.\n• Misuse of the support system may result in punishments.\n\n➡️ After opening the ticket, explain your situation and a staff member will assist you in the ticket.\n\n🇧🇷  ⚠️ Antes de abrir um ticket:\n• Descreva seu problema de forma clara e objetiva.\n• Evite marcar ou mencionar membros da equipe.\n• Aguarde a resposta da staff com paciência.\n• Tickets sem atividade podem ser encerrados automaticamente.\n• Uso indevido do sistema de suporte pode resultar em punições.\n\n➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.""",
     color=0xff0000
 )
 
-    embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")
+    embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
     embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-    embed.set_footer(text="Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")
+    embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
 
     await interaction.channel.send(embed=embed, view=TicketPanel())
 
