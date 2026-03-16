@@ -155,33 +155,32 @@ class CloseModal(Modal, title="Close Ticket"):
        try:
 
            transcript = await chat_exporter.export(
-               channel,
+               interaction.channel,
                limit=None,
                tz_info="America/Sao_Paulo",
                guild=interaction.guild,
                bot=bot
            )
 
-           if transcript:
+           if transcript is None:
+               print("Transcript returned None")
+           else:
 
-               file_name = f"{interaction.guild.id}-{channel.id}.html"
+               if not os.path.isdir("transcripts"):
+                   os.makedirs("transcripts")
 
-               if not os.path.exists("transcripts"):
-                   os.mkdir("transcripts")
-
-               file_path = os.path.join("transcripts", file_name)
+               file_name = f"{interaction.guild.id}-{interaction.channel.id}.html"
+               file_path = f"transcripts/{file_name}"
 
                with open(file_path, "w", encoding="utf-8") as f:
                    f.write(transcript)
 
                transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
 
-               print("Transcript URL:", transcript_url)
+               print("Transcript created:", transcript_url)
 
        except Exception as e:
            print("Transcript error:", e)
-
-           print("Transcript URL:", transcript_url)
        # =========================
        # LOG EMBED
        # =========================
@@ -210,13 +209,12 @@ class CloseModal(Modal, title="Close Ticket"):
        view = discord.ui.View()
 
        if transcript_url:
-           view.add_item(
-               discord.ui.Button(
-                   label="View Transcript",
-                   style=discord.ButtonStyle.primary,
-                   url=transcript_url
-               )
+           button = discord.ui.Button(
+               label="View Transcript",
+               style=discord.ButtonStyle.link,
+               url=transcript_url
            )
+           view.add_item(button)
 
        log = bot.get_channel(LOG_CLOSE)
 
