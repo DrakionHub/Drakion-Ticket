@@ -124,90 +124,115 @@ class CloseModal(Modal, title="Close Ticket"):
         style=discord.TextStyle.long
     )
 
-    async def on_submit(self, interaction: discord.Interaction):
+ async def on_submit(self, interaction: discord.Interaction):
 
-        channel = interaction.channel
-        data = tickets.get(channel.id)
-        if data is None:
-            return await interaction.response.send_message(
-                "Ticket data not found.",
-                 ephemeral=True
+    channel = interaction.channel
+    data = tickets.get(channel.id)
+
+    if data is None:
+        return await interaction.response.send_message(
+            "Ticket data not found.",
+            ephemeral=True
+        )
+
+    user = interaction.guild.get_member(data["user"])
+
+    closed_time = datetime.datetime.now(ZoneInfo("America/Sao_Paulo"))
+    formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")
+
+    # =========================
+    # GERAR TRANSCRIPT
+    # =========================
+
+    transcript = await chat_exporter.export(
+        channel,
+        limit=None,
+        tz_info="America/Sao_Paulo",
+        bot=bot
     )
-        user = interaction.guild.get_member(data["user"])
 
-        closed_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))  # Mude para usar o fuso de Brasília
-        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")  # Adicione a indicação
-        log = bot.get_channel(LOG_CLOSE)
+    if transcript is None:
+        return
 
-        embed = discord.Embed(
-            title="Ticket Closed",
+    file_name = f"{interaction.guild.id}-{channel.id}.html"
+    file_path = f"transcripts/{file_name}"
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(transcript)
+
+    transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+
+    # =========================
+    # LOG EMBED
+    # =========================
+
+    embed = discord.Embed(
+        title="Ticket Closed",
+        color=0xff0000
+    )
+
+    embed.add_field(name="`User:`", value=user.mention, inline=False)
+    embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
+    embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
+    embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
+
+    embed.set_footer(
+        text="Drakion Ticket © | All Rights Reserved.",
+        icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+    )
+
+    embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+
+    embed.set_thumbnail(
+        url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+    )
+
+    view = discord.ui.View()
+    view.add_item(
+        discord.ui.Button(
+            label="View Transcript",
+            url=transcript_url
+        )
+    )
+
+    log = bot.get_channel(LOG_CLOSE)
+
+    await log.send(embed=embed, view=view)
+
+    # =========================
+    # DM PARA USUÁRIO
+    # =========================
+
+    try:
+
+        dm_embed = discord.Embed(
+            title="Your ticket was closed",
             color=0xff0000
         )
-        view = discord.ui.View()
 
-        view.add_item(
-            discord.ui.Button(
-                label="View Transcript",
-                url=transcript_url
-    )
-)
+        dm_embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
+        dm_embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
+        dm_embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
 
-        embed.add_field(name="`User:`", value=user.mention, inline=False)
-        embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
-        embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
-        embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
-        embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
-        embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-        embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
-
-        await log.send(embed=embed, view=view)
-
-        try:
-            dm_embed = discord.Embed(
-                title="Your ticket was closed",
-                color=0xff0000
-            )
-
-            dm_embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
-            dm_embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
-            dm_embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
-            dm_embed.set_footer(text= "Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048") 
-            dm_embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
-            dm_embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")  # Adicione esta linha para a thumbnail
-
-            await user.send(embed=dm_embed, view=view)
-
-        except:
-            pass
-# =========================
-# GERAR TRANSCRIPT
-# =========================
-
-       transcript = await chat_exporter.export(
-           interaction.channel,
-           limit=None,
-           tz_info="America/Sao_Paulo",
-           bot=bot
+        dm_embed.set_footer(
+            text="Drakion Ticket © | All Rights Reserved.",
+            icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
         )
 
-        if transcript is None:
-            return
+        dm_embed.set_thumbnail(
+            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+        )
 
-        file_name = f"transcript-{interaction.channel.id}.html"
-        file_path = f"transcripts/{file_name}"
+        await user.send(embed=dm_embed, view=view)
 
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(transcript)
+    except:
+        pass
 
-        transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+    await interaction.response.send_message("Closing ticket...")
 
+    tickets.pop(channel.id, None)
 
-        await interaction.response.send_message("Closing ticket...")
-
-        tickets.pop(channel.id, None)
-
-        await channel.delete()
-
+    await channel.delete()
 # =========================
 # BOTÕES DO TICKET
 # =========================
