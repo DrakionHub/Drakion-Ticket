@@ -126,6 +126,8 @@ class CloseModal(Modal, title="Close Ticket"):
 
     async def on_submit(self, interaction: discord.Interaction):
 
+       await interaction.response.defer(ephemeral=True)
+
        channel = interaction.channel
        data = tickets.get(channel.id)
 
@@ -136,6 +138,9 @@ class CloseModal(Modal, title="Close Ticket"):
            )
 
        user = interaction.guild.get_member(data["user"])
+
+       if user is None:
+           user = await bot.fetch_user(data["user"])
 
        closed_time = datetime.datetime.now(ZoneInfo("America/Sao_Paulo"))
        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")
@@ -155,6 +160,7 @@ class CloseModal(Modal, title="Close Ticket"):
            return
 
        file_name = f"{interaction.guild.id}-{channel.id}.html"
+       os.makedirs("transcripts", exist_ok=True)
        file_path = f"transcripts/{file_name}"
 
        with open(file_path, "w", encoding="utf-8") as f:
@@ -228,7 +234,7 @@ class CloseModal(Modal, title="Close Ticket"):
        except:
            pass
 
-       await interaction.response.send_message("Closing ticket...")
+       await interaction.followup.send("Closing ticket...")
 
        tickets.pop(channel.id, None)
 
