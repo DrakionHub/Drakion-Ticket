@@ -6,6 +6,7 @@ import datetime
 import chat_exporter
 import io
 from zoneinfo import ZoneInfo
+import asyncio
 
 TOKEN = os.getenv("TOKEN1")
 
@@ -149,25 +150,32 @@ class CloseModal(Modal, title="Close Ticket"):
        # GERAR TRANSCRIPT
        # =========================
 
-       transcript = await chat_exporter.export(
-           channel,
-           limit=None,
-           tz_info="America/Sao_Paulo",
-           bot=bot
-       )
+       transcript_url = None
 
-       if transcript is None:
-           return
+       try:
 
-       file_name = f"{interaction.guild.id}-{channel.id}.html"
-       os.makedirs("transcripts", exist_ok=True)
-       file_path = f"transcripts/{file_name}"
+           transcript = await chat_exporter.export(
+               channel,
+               limit=None,
+               tz_info="America/Sao_Paulo",
+               bot=bot
+           )
 
-       with open(file_path, "w", encoding="utf-8") as f:
-           f.write(transcript)
+           if transcript:
 
-       transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+               file_name = f"{interaction.guild.id}-{channel.id}.html"
 
+               os.makedirs("transcripts", exist_ok=True)
+
+               file_path = f"transcripts/{file_name}"
+
+               with open(file_path, "w", encoding="utf-8") as f:
+                   f.write(transcript)
+
+               transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+
+       except Exception as e:
+           print("Transcript error:", e)
        # =========================
        # LOG EMBED
        # =========================
@@ -194,13 +202,14 @@ class CloseModal(Modal, title="Close Ticket"):
        )
 
        view = discord.ui.View()
-       view.add_item(
-           discord.ui.Button(
-               label="View Transcript",
-               url=transcript_url
-           )
-       )
 
+       if transcript_url:
+           view.add_item(
+               discord.ui.Button(
+                   label="View Transcript",
+                   url=transcript_url
+               )
+           )
        log = bot.get_channel(LOG_CLOSE)
 
        await log.send(embed=embed, view=view)
@@ -238,6 +247,7 @@ class CloseModal(Modal, title="Close Ticket"):
 
        tickets.pop(channel.id, None)
 
+       await asyncio.sleep(2)
        await channel.delete()
 # =========================
 # BOTÕES DO TICKET
