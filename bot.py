@@ -163,9 +163,10 @@ class CloseModal(Modal, title="Close Ticket"):
            ) 
 
            if transcript:
-               print("Transcript generated successfully")
-
-               os.makedirs("transcripts", exist_ok=True)
+               from pathlib import Path
+                
+                # Cria a pasta se não existir; se existir, não faz nada e não dá erro
+                Path("transcripts").mkdir(parents=True, exist_ok=True)
 
                file_name = f"{interaction.guild.id}-{interaction.channel.id}.html"
                file_path = f"transcripts/{file_name}"
