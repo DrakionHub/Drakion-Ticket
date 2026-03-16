@@ -157,7 +157,8 @@ class CloseModal(Modal, title="Close Ticket"):
            transcript = await chat_exporter.export(
                channel,
                limit=None,
-               tz_info="America/Sao_Paulo",
+               tz_info=ZoneInfo("America/Sao_Paulo"),
+               guild=interaction.guild,
                bot=bot
            )
 
@@ -167,7 +168,7 @@ class CloseModal(Modal, title="Close Ticket"):
 
                os.makedirs("transcripts", exist_ok=True)
 
-               file_path = f"transcripts/{file_name}"
+               file_path = os.path.join("transcripts", file_name)
 
                with open(file_path, "w", encoding="utf-8") as f:
                    f.write(transcript)
@@ -176,6 +177,8 @@ class CloseModal(Modal, title="Close Ticket"):
 
        except Exception as e:
            print("Transcript error:", e)
+
+           print("Transcript URL:", transcript_url)
        # =========================
        # LOG EMBED
        # =========================
@@ -201,10 +204,16 @@ class CloseModal(Modal, title="Close Ticket"):
            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
        )
 
-       view = None
+       view = discord.ui.View()
 
        if transcript_url:
-           view = TranscriptButton(transcript_url)
+           view.add_item(
+               discord.ui.Button(
+                   label="View Transcript",
+                   style=discord.ButtonStyle.primary,
+                   url=transcript_url
+               )
+           )
 
        log = bot.get_channel(LOG_CLOSE)
 
