@@ -201,15 +201,11 @@ class CloseModal(Modal, title="Close Ticket"):
            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
        )
 
-       view = discord.ui.View()
+       view = None
 
        if transcript_url:
-           view.add_item(
-               discord.ui.Button(
-                   label="View Transcript",
-                   url=transcript_url
-               )
-           )
+           view = TranscriptButton(transcript_url)
+
        log = bot.get_channel(LOG_CLOSE)
 
        await log.send(embed=embed, view=view)
@@ -252,6 +248,18 @@ class CloseModal(Modal, title="Close Ticket"):
 # =========================
 # BOTÕES DO TICKET
 # =========================
+class TranscriptButton(View):
+
+    def __init__(self, url):
+        super().__init__(timeout=None)
+
+        self.add_item(
+            Button(
+                label="Transcript",
+                style=discord.ButtonStyle.primary,
+                url=url
+            )
+        )
 
 class TicketButtons(View):
 
