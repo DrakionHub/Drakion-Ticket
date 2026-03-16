@@ -124,7 +124,7 @@ class CloseModal(Modal, title="Close Ticket"):
         style=discord.TextStyle.long
     )
 
- async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: discord.Interaction):
 
     channel = interaction.channel
     data = tickets.get(channel.id)
