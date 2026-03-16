@@ -45,19 +45,11 @@ class TicketModal(Modal, title="Create Ticket"):
         category = guild.get_channel(TICKET_CATEGORY)
         user = interaction.user
 
-        # impedir múltiplos tickets
-        for ticket in tickets.values():
-            if ticket["user"] == user.id:
-                return await interaction.response.send_message(
-                    "You already have an open ticket.",
-                    ephemeral=True
-                )
-
         created_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))
         formatted_time = created_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")
 
         channel = await guild.create_text_channel(
-            name=f"ticket-{user.id}",
+            name=f"ticket-{user.name}",
             category=category
         )
 
@@ -72,7 +64,7 @@ class TicketModal(Modal, title="Create Ticket"):
 
         embed = discord.Embed(
             title=f"Hello {user.name} 👋, We are at your service.",
-            description="🇺🇸 A staff member will assist you shortly.\n\n🇧🇷 Um membro da nossa equipe irá atendê-lo em breve.",
+            description=f"🇺🇸 A staff member will assist you shortly. Please provide all necessary information about your issue to help us assist you better.\n\n🇧🇷 Um membro da nossa equipe irá atendê-lo em breve. Por favor, forneça todas as informações necessárias sobre o seu problema para que possamos ajudá-lo da melhor forma possível.\n\n",
             color=0xff0000
         )
 
@@ -85,17 +77,18 @@ class TicketModal(Modal, title="Create Ticket"):
             icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
         )
 
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+
         embed.set_thumbnail(
             url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
         )
 
         await channel.send(
-            content=f"{user.mention}",
+            content=f"{user.mention} <@&1482826480248553584>",
             embed=embed,
             view=TicketButtons()
         )
 
-        # LOG CRIAÇÃO
         log = bot.get_channel(LOG_CREATE)
 
         embedlog = discord.Embed(
@@ -111,6 +104,12 @@ class TicketModal(Modal, title="Create Ticket"):
         embedlog.set_footer(
             text="Drakion Ticket © | All Rights Reserved.",
             icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+        )
+
+        embedlog.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+
+        embedlog.set_thumbnail(
+            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
         )
 
         await log.send(embed=embedlog)
@@ -136,12 +135,6 @@ class CloseModal(Modal, title="Close Ticket"):
         channel = interaction.channel
         data = tickets.get(channel.id)
 
-        if data is None:
-            return await interaction.response.send_message(
-                "Ticket data not found.",
-                ephemeral=True
-            )
-
         user = interaction.guild.get_member(data["user"])
 
         closed_time = datetime.datetime.now(ZoneInfo('America/Sao_Paulo'))
@@ -156,24 +149,45 @@ class CloseModal(Modal, title="Close Ticket"):
 
         embed.add_field(name="`User:`", value=user.mention, inline=False)
         embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
-        embed.add_field(name="`Reason:`", value=self.reason.value, inline=False)
+        embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
         embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
+
+        embed.set_footer(
+            text="Drakion Ticket © | All Rights Reserved.",
+            icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+        )
+
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+
+        embed.set_thumbnail(
+            url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+        )
 
         await log.send(embed=embed)
 
-        # DM usuário
         try:
 
-            dm = discord.Embed(
+            dm_embed = discord.Embed(
                 title="Your ticket was closed",
                 color=0xff0000
             )
 
-            dm.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
-            dm.add_field(name="`Reason:`", value=self.reason.value, inline=False)
-            dm.add_field(name="`Closed at:`", value=formatted_close, inline=False)
+            dm_embed.add_field(name="`Closed by:`", value=interaction.user.mention, inline=False)
+            dm_embed.add_field(name="`Motive for closing:`", value=self.reason.value, inline=False)
+            dm_embed.add_field(name="`Closed at:`", value=formatted_close, inline=False)
 
-            await user.send(embed=dm)
+            dm_embed.set_footer(
+                text="Drakion Ticket © | All Rights Reserved.",
+                icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+            )
+
+            dm_embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+
+            dm_embed.set_thumbnail(
+                url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+            )
+
+            await user.send(embed=dm_embed)
 
         except:
             pass
@@ -193,22 +207,14 @@ class TicketButtons(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Claim Ticket", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Claim Ticket", style=discord.ButtonStyle.green, custom_id="claim_ticket")
     async def claim(self, interaction: discord.Interaction, button: Button):
 
         if not any(role.id in STAFF_ROLES for role in interaction.user.roles):
-            return await interaction.response.send_message(
-                "No permission.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("No permission.", ephemeral=True)
 
-        data = tickets.get(interaction.channel.id)
-
-        if data is None:
-            return await interaction.response.send_message(
-                "Ticket data not found.",
-                ephemeral=True
-            )
+        channel = interaction.channel
+        data = tickets.get(channel.id)
 
         if data["claimed_by"] is not None:
             staff = interaction.guild.get_member(data["claimed_by"])
@@ -220,10 +226,6 @@ class TicketButtons(View):
         data["claimed_by"] = interaction.user.id
 
         message = interaction.message
-
-        if not message.embeds:
-            return
-
         embed = message.embeds[0]
 
         embed.set_field_at(
@@ -239,14 +241,11 @@ class TicketButtons(View):
             f"Ticket claimed by {interaction.user.mention}"
         )
 
-    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket")
     async def close(self, interaction: discord.Interaction, button: Button):
 
         if not any(role.id in STAFF_ROLES for role in interaction.user.roles):
-            return await interaction.response.send_message(
-                "No permission.",
-                ephemeral=True
-            )
+            return await interaction.response.send_message("No permission.", ephemeral=True)
 
         await interaction.response.send_modal(CloseModal())
 
@@ -259,7 +258,11 @@ class TicketPanel(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Open Ticket", style=discord.ButtonStyle.primary)
+    @discord.ui.button(
+        label="Open Ticket",
+        style=discord.ButtonStyle.primary,
+        custom_id="open_ticket"
+    )
     async def open_ticket(self, interaction: discord.Interaction, button: Button):
 
         await interaction.response.send_modal(TicketModal())
@@ -278,14 +281,31 @@ async def ticket_panel(interaction: discord.Interaction):
         )
 
     embed = discord.Embed(
-        title="🐉 Service | Drakion Support",
-        description="Click the button below to open a support ticket.",
-        color=0xff0000
-    )
+    title="🐉 Service | Drakion Support",
+    description="""🇺🇸  ⚠️ Before opening a ticket:
 
-    embed.set_thumbnail(
-        url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
-    )
+• Describe your issue clearly and briefly.
+• Avoid mentioning or pinging staff members.
+• Please be patient while waiting for a response.
+• Tickets without activity may be closed automatically.
+• Misuse of the support system may result in punishments.
+
+➡️ After opening the ticket, explain your situation and a staff member will assist you in the ticket.
+
+🇧🇷  ⚠️ Antes de abrir um ticket:
+• Descreva seu problema de forma clara e objetiva.
+• Evite marcar ou mencionar membros da equipe.
+• Aguarde a resposta da staff com paciência.
+• Tickets sem atividade podem ser encerrados automaticamente.
+• Uso indevido do sistema de suporte pode resultar em punições.
+
+➡️ Após abrir o ticket, explique sua situação e um membro da equipe irá ajudá-lo no próprio atendimento.""",
+    color=0xff0000
+)
+
+    embed.set_thumbnail(url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")
+    embed.set_image(url="https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png")
+    embed.set_footer(text="Drakion Ticket © | All Rights Reserved.", icon_url="https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048")
 
     await interaction.channel.send(embed=embed, view=TicketPanel())
 
