@@ -166,7 +166,8 @@ class CloseModal(Modal, title="Close Ticket"):
 
                file_name = f"{interaction.guild.id}-{channel.id}.html"
 
-               os.makedirs("transcripts", exist_ok=True)
+               if not os.path.exists("transcripts"):
+                   os.mkdir("transcripts")
 
                file_path = os.path.join("transcripts", file_name)
 
@@ -174,6 +175,8 @@ class CloseModal(Modal, title="Close Ticket"):
                    f.write(transcript)
 
                transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+
+               print("Transcript URL:", transcript_url)
 
        except Exception as e:
            print("Transcript error:", e)
