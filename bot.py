@@ -160,11 +160,10 @@ class CloseModal(Modal, title="Close Ticket"):
                tz_info="America/Sao_Paulo",
                guild=interaction.guild,
                bot=bot
-           )
+           ) 
 
-           if transcript is None:
-               print("Transcript returned None")
-           else:
+           if transcript:
+               print("Transcript generated successfully")
 
                if not os.path.isdir("transcripts"):
                    os.makedirs("transcripts")
@@ -177,10 +176,14 @@ class CloseModal(Modal, title="Close Ticket"):
 
                transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
 
-               print("Transcript created:", transcript_url)
+               print("Transcript URL:", transcript_url)
+
+           else:
+               print("chat_exporter returned None")
 
        except Exception as e:
            print("Transcript error:", e)
+
        # =========================
        # LOG EMBED
        # =========================
@@ -209,12 +212,15 @@ class CloseModal(Modal, title="Close Ticket"):
        view = discord.ui.View()
 
        if transcript_url:
-           button = discord.ui.Button(
-               label="View Transcript",
-               style=discord.ButtonStyle.link,
-               url=transcript_url
+           view.add_item(
+               discord.ui.Button(
+                   label="View Transcript",
+                   style=discord.ButtonStyle.link,
+                   url=transcript_url
+               )
            )
-           view.add_item(button)
+       else:
+           print("Transcript URL not created")
 
        log = bot.get_channel(LOG_CLOSE)
 
