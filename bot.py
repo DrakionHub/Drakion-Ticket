@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 import os
 import datetime
+import pytz
 
 TOKEN = os.getenv("TOKEN1")
 
@@ -44,8 +45,8 @@ class TicketModal(Modal, title="Create Ticket"):
         category = guild.get_channel(TICKET_CATEGORY)
         user = interaction.user
 
-        created_time = datetime.datetime.now()
-        formatted_time = created_time.strftime("%d/%m/%Y %H:%M")
+        created_time = datetime.datetime.now(pytz.timezone('America/Sao_Paulo'))  # Mude para usar o fuso de Brasília
+        formatted_time = created_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")  # Adicione a indicação
 
         channel = await guild.create_text_channel(
             name=f"ticket-{user.name}",
@@ -121,9 +122,8 @@ class CloseModal(Modal, title="Close Ticket"):
 
         user = interaction.guild.get_member(data["user"])
 
-        closed_time = datetime.datetime.now()
-        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M")
-
+        closed_time = datetime.datetime.now(pytz.timezone('America/Sao_Paulo'))  # Mude para usar o fuso de Brasília
+        formatted_close = closed_time.strftime("%d/%m/%Y %H:%M (Brasília time - BR)")  # Adicione a indicação
         log = bot.get_channel(LOG_CLOSE)
 
         embed = discord.Embed(
