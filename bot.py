@@ -165,8 +165,7 @@ class CloseModal(Modal, title="Close Ticket"):
            if transcript:
                print("Transcript generated successfully")
 
-               if not os.path.isdir("transcripts"):
-                   os.makedirs("transcripts")
+               os.makedirs("transcripts", exist_ok=True)
 
                file_name = f"{interaction.guild.id}-{interaction.channel.id}.html"
                file_path = f"transcripts/{file_name}"
