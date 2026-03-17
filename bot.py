@@ -7,6 +7,7 @@ import chat_exporter
 import io
 from zoneinfo import ZoneInfo
 import asyncio
+from pathlib import Path
 
 TOKEN = os.getenv("TOKEN1")
 
@@ -163,8 +164,6 @@ class CloseModal(Modal, title="Close Ticket"):
            ) 
 
            if transcript:
-               from pathlib import Path
-                
                 # Cria a pasta se não existir; se existir, não faz nada e não dá erro
                 Path("transcripts").mkdir(parents=True, exist_ok=True)
 
