@@ -166,7 +166,7 @@ class CloseModal(Modal, title="Close Ticket"):
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(transcript)
 
-                transcript_url = f"https://Drakionbot.up.railway.app/transcript/{file_name}"
+                transcript_url = f"https://drakion-ticket-production.up.railway.app/transcript/{file_name}"
                 print(f"Sucesso! URL do Transcript: {transcript_url}")
             else:
                 print("chat_exporter não retornou dados.")
