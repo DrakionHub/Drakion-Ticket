@@ -148,10 +148,16 @@ class CloseModal(Modal, title="Close Ticket"):
             if transcript:
                 # Tentativa robusta de garantir a existência do diretório
                 folder_name = "transcripts"
-                try:
-                    os.makedirs(folder_name, exist_ok=True)
-                except Exception as e:
-                    print(f"Erro ao criar pasta transcripts: {e}")
+                if not os.path.exists(folder_name):
+                    try:
+                        os.makedirs(folder_name, exist_ok=True)
+                    except FileExistsError:
+                        # Se o SO disser que existe mesmo após o check, ignoramos
+                        pass
+                elif not os.path.isdir(folder_name):
+                    # Caso raro: existe um arquivo chamado 'transcripts' em vez de uma pasta
+                    print(f"Erro: '{folder_name}' existe mas não é um diretório!")
+                    # Aqui você pode decidir se deleta o arquivo ou muda o nome da pasta
 
                 file_name = f"{interaction.guild.id}-{interaction.channel.id}.html"
                 file_path = os.path.join(folder_name, file_name)
@@ -160,7 +166,7 @@ class CloseModal(Modal, title="Close Ticket"):
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(transcript)
 
-                transcript_url = f"https://drakion-ticket.onrender.com/transcript/{file_name}"
+                transcript_url = f"https://drakion-ticket-production.up.railway.app/transcript/{file_name}"
                 print(f"Sucesso! URL do Transcript: {transcript_url}")
             else:
                 print("chat_exporter não retornou dados.")
