@@ -1,17 +1,13 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory
 import os
-
-app = Flask(__name__)
-
-@app.route('/health')
-def health():
-    return jsonify({"status": "online"})
-
+app = Flask(**name**)
+# Rota para servir os arquivos da pasta transcripts
 @app.route("/transcript/<filename>")
 def get_transcript(filename):
-    directory = os.path.join(os.getcwd(), "transcripts")
-    return send_from_directory(directory, filename, mimetype='text/html')
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 3000))
-    app.run(host="0.0.0.0", port=port)
+    # Obtém o caminho absoluto da pasta transcripts
+    directory = os.path.join(os.getcwd(), "transcripts")
+    return send_from_directory(directory, filename)
+if **name** == "**main**":
+    # O Railway usa a variável de ambiente PORT, se não houver, usa 3000
+    port = int(os.environ.get("PORT", 3000))
+    app.run(host="0.0.0.0", port=port)
