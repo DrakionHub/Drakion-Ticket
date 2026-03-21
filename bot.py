@@ -146,9 +146,10 @@ class CloseModal(Modal, title="Close Ticket"):
             )
 
             if transcript:
-                # Tentativa robusta de garantir a existência do diretório
-                folder_name = "transcripts"
-                if not os.path.exists(folder_name):
+                folder_name = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", "/transcripts")
+                if not folder_name.endswith("/transcripts"):
+                    folder_name = os.path.join(folder_name, "transcripts")
+                # ... resto igual, use folder_name nas os.makedirs e file_path
                     try:
                         os.makedirs(folder_name, exist_ok=True)
                     except FileExistsError:
