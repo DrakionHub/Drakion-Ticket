@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 
 # Pega o mount path do Railway (se não tiver, fallback para /transcripts)
-TRANSCRIPTS_DIR = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", "/transcripts")
+TRANSCRIPTS_DIR = "transcripts"
 if not TRANSCRIPTS_DIR.endswith("/transcripts"):
     TRANSCRIPTS_DIR = os.path.join(TRANSCRIPTS_DIR, "transcripts")  # ajusta se montou em /data
 
