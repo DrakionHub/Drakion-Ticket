@@ -146,28 +146,20 @@ class CloseModal(Modal, title="Close Ticket"):
             )
 
             if transcript:
-                folder_name = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", "/transcripts")
-                if not folder_name.endswith("/transcripts"):
-                    folder_name = os.path.join(folder_name, "transcripts")
-                # ... resto igual, use folder_name nas os.makedirs e file_path
-                    try:
-                        os.makedirs(folder_name, exist_ok=True)
-                    except FileExistsError:
-                        # Se o SO disser que existe mesmo após o check, ignoramos
-                        pass
-                elif not os.path.isdir(folder_name):
-                    # Caso raro: existe um arquivo chamado 'transcripts' em vez de uma pasta
-                    print(f"Erro: '{folder_name}' existe mas não é um diretório!")
-                    # Aqui você pode decidir se deleta o arquivo ou muda o nome da pasta
+                folder_name = "transcripts"
+
+                # cria a pasta caso não exista
+                os.makedirs(folder_name, exist_ok=True)
 
                 file_name = f"{interaction.guild.id}-{interaction.channel.id}.html"
                 file_path = os.path.join(folder_name, file_name)
 
-                # Escrita do arquivo
+                # salva o transcript
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(transcript)
 
-                transcript_url = f"https://drakion-ticket-production.up.railway.app/transcript/{file_name}"
+                transcript_url = f"https://drakion-ticket.onrender.com/transcript/{file_name}"
+
                 print(f"Sucesso! URL do Transcript: {transcript_url}")
             else:
                 print("chat_exporter não retornou dados.")
